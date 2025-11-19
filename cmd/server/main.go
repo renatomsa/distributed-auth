@@ -53,16 +53,16 @@ func main() {
 	)
 
 	grpcserver.RegisterServer(grpcServer, authService, cfg.ServerID)
-	log.Printf("✅ gRPC server registered on port %s", cfg.GRPCPort)
+	log.Printf("gRPC server registered on port %s", cfg.GRPCPort)
 
 	go func() {
 		sigCh := make(chan os.Signal, 1)
 		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 		<-sigCh
 
-		log.Println("\n🛑 Shutting down gracefully...")
+		log.Println("\nShutting down gracefully...")
 		grpcServer.GracefulStop()
-		log.Println("✅ Server stopped")
+		log.Println("Server stopped")
 	}()
 
 	log.Printf("gRPC Server [%s] listening on port %s", cfg.ServerID, cfg.GRPCPort)
