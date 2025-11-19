@@ -18,24 +18,20 @@ var (
 	ErrInvalidPassword   = errors.New("invalid password")
 )
 
-// PostgresDB implementa a camada de acesso a dados usando PostgreSQL
 type PostgresDB struct {
 	db *sql.DB
 }
 
-// NewPostgresDB cria uma nova conexão com PostgreSQL
 func NewPostgresDB(connString string) (*PostgresDB, error) {
 	db, err := sql.Open("postgres", connString)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	// Configurar pool de conexões
 	db.SetMaxOpenConns(25)
 	db.SetMaxIdleConns(5)
 	db.SetConnMaxLifetime(5 * time.Minute)
 
-	// Verificar conexão
 	if err := db.Ping(); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
@@ -43,17 +39,14 @@ func NewPostgresDB(connString string) (*PostgresDB, error) {
 	return &PostgresDB{db: db}, nil
 }
 
-// Close fecha a conexão com o banco
 func (p *PostgresDB) Close() error {
 	return p.db.Close()
 }
 
-// GetDB retorna o *sql.DB interno (para migrations)
 func (p *PostgresDB) GetDB() *sql.DB {
 	return p.db
 }
 
-// GetUserByUsername busca um usuário pelo username
 func (p *PostgresDB) GetUserByUsername(username string) (*auth.User, error) {
 	query := `
 		SELECT id, username, password_hash, email, created_at
@@ -80,7 +73,6 @@ func (p *PostgresDB) GetUserByUsername(username string) (*auth.User, error) {
 	return &user, nil
 }
 
-// GetUserByID busca um usuário pelo ID
 func (p *PostgresDB) GetUserByID(id int) (*auth.User, error) {
 	query := `
 		SELECT id, username, password_hash, email, created_at
@@ -107,9 +99,7 @@ func (p *PostgresDB) GetUserByID(id int) (*auth.User, error) {
 	return &user, nil
 }
 
-// CreateUser cria um novo usuário
 func (p *PostgresDB) CreateUser(username, password, email string) (*auth.User, error) {
-	// Hash da senha
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash password: %w", err)
@@ -137,7 +127,6 @@ func (p *PostgresDB) CreateUser(username, password, email string) (*auth.User, e
 	return &user, nil
 }
 
-// ValidatePassword verifica se a senha está correta
 func (p *PostgresDB) ValidatePassword(username, password string) (*auth.User, error) {
 	user, err := p.GetUserByUsername(username)
 	if err != nil {

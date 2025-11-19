@@ -8,22 +8,18 @@ import (
 )
 
 var (
-	// JWTSecret deve ser compartilhado entre todos os servidores
-	// Em produção, carregue de variável de ambiente ou secret manager
 	JWTSecret = []byte("meu-secret-super-seguro-compartilhado-123")
 
 	ErrInvalidToken = errors.New("invalid token")
 	ErrExpiredToken = errors.New("token expired")
 )
 
-// Claims representa as informações no JWT
 type Claims struct {
 	UserID   int    `json:"user_id"`
 	Username string `json:"username"`
 	jwt.RegisteredClaims
 }
 
-// GenerateToken cria um novo JWT token para o usuário
 func GenerateToken(userID int, username string) (string, error) {
 	now := time.Now()
 	claims := Claims{
@@ -46,10 +42,8 @@ func GenerateToken(userID int, username string) (string, error) {
 	return tokenString, nil
 }
 
-// ValidateToken valida e parseia um JWT token
 func ValidateToken(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		// Verificar método de assinatura
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrInvalidToken
 		}
@@ -70,9 +64,7 @@ func ValidateToken(tokenString string) (*Claims, error) {
 	return nil, ErrInvalidToken
 }
 
-// RefreshToken cria um novo token baseado em um token válido (mas possivelmente expirado)
 func RefreshToken(oldTokenString string) (string, error) {
-	// Parse sem validar expiração
 	token, err := jwt.ParseWithClaims(oldTokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return JWTSecret, nil
 	}, jwt.WithoutClaimsValidation())
@@ -82,7 +74,6 @@ func RefreshToken(oldTokenString string) (string, error) {
 	}
 
 	if claims, ok := token.Claims.(*Claims); ok {
-		// Gerar novo token
 		return GenerateToken(claims.UserID, claims.Username)
 	}
 

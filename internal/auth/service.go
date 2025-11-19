@@ -6,28 +6,23 @@ import (
 	"log"
 )
 
-// Database define a interface que a camada de dados deve implementar
 type Database interface {
 	GetUserByUsername(username string) (*User, error)
 	GetUserByID(id int) (*User, error)
 	ValidatePassword(username, password string) (*User, error)
 }
 
-// Service implementa a lógica de negócio de autenticação
 type Service struct {
 	db Database
 }
 
-// NewService cria uma nova instância do serviço de autenticação
 func NewService(db Database) *Service {
 	return &Service{db: db}
 }
 
-// Authenticate autentica um usuário e retorna um token JWT
 func (s *Service) Authenticate(username, password string) (*LoginResponse, error) {
 	log.Printf("[AuthService] Authenticating user: %s", username)
 
-	// Validar entrada
 	if username == "" || password == "" {
 		log.Printf("[AuthService] Invalid input: username or password empty")
 		return &LoginResponse{
@@ -36,7 +31,6 @@ func (s *Service) Authenticate(username, password string) (*LoginResponse, error
 		}, nil
 	}
 
-	// Validar credenciais no banco
 	user, err := s.db.ValidatePassword(username, password)
 	if err != nil {
 		log.Printf("[AuthService] Authentication failed for %s: %v", username, err)
@@ -46,7 +40,6 @@ func (s *Service) Authenticate(username, password string) (*LoginResponse, error
 		}, nil
 	}
 
-	// Gerar token JWT
 	token, err := GenerateToken(user.ID, user.Username)
 	if err != nil {
 		log.Printf("[AuthService] Failed to generate token: %v", err)
@@ -62,7 +55,6 @@ func (s *Service) Authenticate(username, password string) (*LoginResponse, error
 	}, nil
 }
 
-// ValidateToken valida um token JWT e retorna as informações do usuário
 func (s *Service) ValidateToken(tokenString string) (*ValidateTokenResponse, error) {
 	log.Printf("[AuthService] Validating token")
 
@@ -73,7 +65,6 @@ func (s *Service) ValidateToken(tokenString string) (*ValidateTokenResponse, err
 		}, nil
 	}
 
-	// Validar token
 	claims, err := ValidateToken(tokenString)
 	if err != nil {
 		if errors.Is(err, ErrExpiredToken) {
@@ -91,7 +82,6 @@ func (s *Service) ValidateToken(tokenString string) (*ValidateTokenResponse, err
 		}, nil
 	}
 
-	// Verificar se usuário ainda existe no banco
 	user, err := s.db.GetUserByID(claims.UserID)
 	if err != nil {
 		log.Printf("[AuthService] User not found for token: %v", err)
@@ -111,7 +101,6 @@ func (s *Service) ValidateToken(tokenString string) (*ValidateTokenResponse, err
 	}, nil
 }
 
-// RefreshToken renova um token JWT
 func (s *Service) RefreshToken(oldToken string) (*LoginResponse, error) {
 	log.Printf("[AuthService] Refreshing token")
 
@@ -122,7 +111,6 @@ func (s *Service) RefreshToken(oldToken string) (*LoginResponse, error) {
 		}, nil
 	}
 
-	// Gerar novo token
 	newToken, err := RefreshToken(oldToken)
 	if err != nil {
 		log.Printf("[AuthService] Failed to refresh token: %v", err)

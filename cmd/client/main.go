@@ -12,7 +12,6 @@ import (
 	pb "github.com/renatomsa/auth-grpc/proto"
 )
 
-// Servidores disponíveis
 var servers = []string{
 	"localhost:9001",
 	"localhost:9002",
@@ -20,12 +19,11 @@ var servers = []string{
 }
 
 func main() {
-	fmt.Println("🧪 Testing gRPC Authentication System")
+	fmt.Println("Testing gRPC Authentication System")
 	fmt.Println("=====================================\n")
 
-	// Testar cada servidor
 	for i, addr := range servers {
-		fmt.Printf("📡 Testing Server %d: %s\n", i+1, addr)
+		fmt.Printf("Testing Server %d: %s\n", i+1, addr)
 		fmt.Println("-------------------------------------")
 
 		if err := testServer(addr); err != nil {
@@ -39,7 +37,6 @@ func main() {
 }
 
 func testServer(addr string) error {
-	// Conectar ao servidor gRPC
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -56,7 +53,6 @@ func testServer(addr string) error {
 
 	client := pb.NewAuthServiceClient(conn)
 
-	// Teste 1: Login com credenciais válidas
 	fmt.Println("Test 1: Valid credentials (alice/password123)")
 	loginResp, err := client.Login(context.Background(), &pb.LoginRequest{
 		Username: "alice",
@@ -67,11 +63,10 @@ func testServer(addr string) error {
 	}
 
 	if loginResp.Success {
-		fmt.Printf("✅ Login successful\n")
-		fmt.Printf("🎫 Token: %s...\n", loginResp.Token[:50])
+		fmt.Printf("Login successful\n")
+		fmt.Printf("Token: %s...\n", loginResp.Token[:50])
 		token := loginResp.Token
 
-		// Teste 2: Validar token
 		fmt.Println("\nTest 2: Validate token")
 		validateResp, err := client.ValidateToken(context.Background(), &pb.ValidateTokenRequest{
 			Token: token,
@@ -81,13 +76,12 @@ func testServer(addr string) error {
 		}
 
 		if validateResp.Valid {
-			fmt.Printf("✅ Token is valid\n")
-			fmt.Printf("👤 User: %s (ID: %d)\n", validateResp.Username, validateResp.UserId)
+			fmt.Printf("Token is valid\n")
+			fmt.Printf("User: %s (ID: %d)\n", validateResp.Username, validateResp.UserId)
 		} else {
-			fmt.Printf("❌ Token is invalid: %s\n", validateResp.Message)
+			fmt.Printf("Token is invalid: %s\n", validateResp.Message)
 		}
 
-		// Teste 3: Refresh token
 		fmt.Println("\nTest 3: Refresh token")
 		refreshResp, err := client.RefreshToken(context.Background(), &pb.RefreshTokenRequest{
 			Token: token,
@@ -97,17 +91,16 @@ func testServer(addr string) error {
 		}
 
 		if refreshResp.Success {
-			fmt.Printf("✅ Token refreshed\n")
-			fmt.Printf("🎫 New Token: %s...\n", refreshResp.Token[:50])
+			fmt.Printf("Token refreshed\n")
+			fmt.Printf("New Token: %s...\n", refreshResp.Token[:50])
 		} else {
-			fmt.Printf("❌ Refresh failed: %s\n", refreshResp.Message)
+			fmt.Printf("Refresh failed: %s\n", refreshResp.Message)
 		}
 
 	} else {
-		fmt.Printf("❌ Login failed: %s\n", loginResp.Message)
+		fmt.Printf("Login failed: %s\n", loginResp.Message)
 	}
 
-	// Teste 4: Login com credenciais inválidas
 	fmt.Println("\nTest 4: Invalid credentials (alice/wrongpass)")
 	loginResp2, err := client.Login(context.Background(), &pb.LoginRequest{
 		Username: "alice",
@@ -118,12 +111,11 @@ func testServer(addr string) error {
 	}
 
 	if !loginResp2.Success {
-		fmt.Printf("✅ Invalid credentials correctly rejected\n")
+		fmt.Printf("Invalid credentials correctly rejected\n")
 	} else {
-		fmt.Printf("❌ Invalid credentials were accepted (BUG!)\n")
+		fmt.Printf("Invalid credentials were accepted (BUG!)\n")
 	}
 
-	// Teste 5: Validar token inválido
 	fmt.Println("\nTest 5: Validate invalid token")
 	validateResp2, err := client.ValidateToken(context.Background(), &pb.ValidateTokenRequest{
 		Token: "invalid.token.here",
@@ -133,9 +125,9 @@ func testServer(addr string) error {
 	}
 
 	if !validateResp2.Valid {
-		fmt.Printf("✅ Invalid token correctly rejected\n")
+		fmt.Printf("Invalid token correctly rejected\n")
 	} else {
-		fmt.Printf("❌ Invalid token was accepted (BUG!)\n")
+		fmt.Printf("Invalid token was accepted (BUG!)\n")
 	}
 
 	return nil

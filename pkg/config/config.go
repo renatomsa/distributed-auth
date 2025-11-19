@@ -5,7 +5,6 @@ import (
 	"os"
 )
 
-// Config armazena todas as configurações da aplicação
 type Config struct {
 	ServerID     string
 	GRPCPort     string
@@ -15,7 +14,6 @@ type Config struct {
 	Environment  string
 }
 
-// Load carrega as configurações de variáveis de ambiente
 func Load() *Config {
 	return &Config{
 		ServerID:    getEnv("SERVER_ID", "grpc-server-1"),
@@ -27,7 +25,6 @@ func Load() *Config {
 	}
 }
 
-// getEnv retorna o valor de uma variável de ambiente ou um valor padrão
 func getEnv(key, defaultValue string) string {
 	value := os.Getenv(key)
 	if value == "" {
@@ -36,7 +33,6 @@ func getEnv(key, defaultValue string) string {
 	return value
 }
 
-// Print imprime as configurações (sem expor secrets)
 func (c *Config) Print() {
 	fmt.Println("==============================================")
 	fmt.Printf("Server ID:    %s\n", c.ServerID)

@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX IF NOT EXISTS idx_username ON users(username);
 `
 
-// RunMigrations executa as migrations do banco de dados
 func RunMigrations(db *sql.DB) error {
 	log.Println("Running database migrations...")
 
@@ -33,11 +32,9 @@ func RunMigrations(db *sql.DB) error {
 	return nil
 }
 
-// SeedUsers popula o banco com usuários de teste
 func SeedUsers(db *sql.DB) error {
 	log.Println("Seeding database with test users...")
 
-	// Verificar se já existem usuários
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM users").Scan(&count)
 	if err != nil {
@@ -49,7 +46,6 @@ func SeedUsers(db *sql.DB) error {
 		return nil
 	}
 
-	// Usuários de teste (senha: "password123" para todos)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("failed to hash password: %w", err)
