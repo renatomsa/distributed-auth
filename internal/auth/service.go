@@ -23,14 +23,6 @@ func NewService(db Database) *Service {
 func (s *Service) Authenticate(username, password string) (*LoginResponse, error) {
 	log.Printf("[AuthService] Authenticating user: %s", username)
 
-	if username == "" || password == "" {
-		log.Printf("[AuthService] Invalid input: username or password empty")
-		return &LoginResponse{
-			Success: false,
-			Message: "Username and password are required",
-		}, nil
-	}
-
 	user, err := s.db.ValidatePassword(username, password)
 	if err != nil {
 		log.Printf("[AuthService] Authentication failed for %s: %v", username, err)
@@ -57,13 +49,6 @@ func (s *Service) Authenticate(username, password string) (*LoginResponse, error
 
 func (s *Service) ValidateToken(tokenString string) (*ValidateTokenResponse, error) {
 	log.Printf("[AuthService] Validating token")
-
-	if tokenString == "" {
-		return &ValidateTokenResponse{
-			Valid:   false,
-			Message: "Token is required",
-		}, nil
-	}
 
 	claims, err := ValidateToken(tokenString)
 	if err != nil {
@@ -98,33 +83,5 @@ func (s *Service) ValidateToken(tokenString string) (*ValidateTokenResponse, err
 		UserID:   user.ID,
 		Username: user.Username,
 		Message:  "Token is valid",
-	}, nil
-}
-
-func (s *Service) RefreshToken(oldToken string) (*LoginResponse, error) {
-	log.Printf("[AuthService] Refreshing token")
-
-	if oldToken == "" {
-		return &LoginResponse{
-			Success: false,
-			Message: "Token is required",
-		}, nil
-	}
-
-	newToken, err := RefreshToken(oldToken)
-	if err != nil {
-		log.Printf("[AuthService] Failed to refresh token: %v", err)
-		return &LoginResponse{
-			Success: false,
-			Message: "Failed to refresh token",
-		}, nil
-	}
-
-	log.Printf("[AuthService] Token refreshed successfully")
-
-	return &LoginResponse{
-		Token:   newToken,
-		Success: true,
-		Message: "Token refreshed",
 	}, nil
 }

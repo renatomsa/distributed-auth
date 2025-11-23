@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -12,39 +11,27 @@ import (
 	pb "github.com/renatomsa/auth-grpc/proto"
 )
 
-var servers = []string{
-	"localhost:9001",
-	"localhost:9002",
-	"localhost:9003",
-}
+const loadBalancerAddr = "localhost:9100"
 
 func main() {
-	fmt.Println("Testing gRPC Authentication System")
-	fmt.Println("=====================================\n")
+	fmt.Println("Testing gRPC Authentication System via Load Balancer")
+	fmt.Println("=====================================")
 
-	for i, addr := range servers {
-		fmt.Printf("Testing Server %d: %s\n", i+1, addr)
-		fmt.Println("-------------------------------------")
+	fmt.Printf("Load Balancer target: %s\n", loadBalancerAddr)
+	fmt.Println("-------------------------------------")
 
-		if err := testServer(addr); err != nil {
-			log.Printf("❌ Server %d failed: %v\n", i+1, err)
-		}
-
-		fmt.Println()
+	if err := testServer(loadBalancerAddr); err != nil {
+		log.Printf("Load balancer test failed: %v\n", err)
+		return
 	}
 
-	fmt.Println("✨ All tests completed!")
+	fmt.Println("All tests completed!")
 }
 
 func testServer(addr string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	conn, err := grpc.DialContext(
-		ctx,
+	conn, err := grpc.NewClient(
 		addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
 	)
 	if err != nil {
 		return fmt.Errorf("failed to connect: %w", err)
@@ -82,26 +69,11 @@ func testServer(addr string) error {
 			fmt.Printf("Token is invalid: %s\n", validateResp.Message)
 		}
 
-		fmt.Println("\nTest 3: Refresh token")
-		refreshResp, err := client.RefreshToken(context.Background(), &pb.RefreshTokenRequest{
-			Token: token,
-		})
-		if err != nil {
-			return fmt.Errorf("refresh failed: %w", err)
-		}
-
-		if refreshResp.Success {
-			fmt.Printf("Token refreshed\n")
-			fmt.Printf("New Token: %s...\n", refreshResp.Token[:50])
-		} else {
-			fmt.Printf("Refresh failed: %s\n", refreshResp.Message)
-		}
-
 	} else {
 		fmt.Printf("Login failed: %s\n", loginResp.Message)
 	}
 
-	fmt.Println("\nTest 4: Invalid credentials (alice/wrongpass)")
+	fmt.Println("\nTest 3: Invalid credentials (alice/wrongpass)")
 	loginResp2, err := client.Login(context.Background(), &pb.LoginRequest{
 		Username: "alice",
 		Password: "wrongpass",
@@ -116,7 +88,7 @@ func testServer(addr string) error {
 		fmt.Printf("Invalid credentials were accepted (BUG!)\n")
 	}
 
-	fmt.Println("\nTest 5: Validate invalid token")
+	fmt.Println("\nTest 4: Validate invalid token")
 	validateResp2, err := client.ValidateToken(context.Background(), &pb.ValidateTokenRequest{
 		Token: "invalid.token.here",
 	})

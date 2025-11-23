@@ -6,7 +6,7 @@ proto:
 	protoc --go_out=. --go_opt=paths=source_relative \
 	    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
 	    proto/auth.proto
-	@echo "✅ Code generated successfully"
+	@echo "Code generated successfully"
 
 # Rodar servidor (porta 9001)
 run-server:
@@ -43,13 +43,13 @@ build:
 	go build -o bin/server cmd/server/main.go
 	@echo "Building client..."
 	go build -o bin/client cmd/client/main.go
-	@echo "✅ Build completed"
+	@echo "Build completed"
 
 # Subir docker-compose (PostgreSQL)
 docker-up:
 	@echo "Starting Docker services..."
 	cd deployments && docker-compose up -d
-	@echo "✅ Docker services started"
+	@echo "Docker services started"
 	@echo "Waiting for PostgreSQL to be ready..."
 	@sleep 5
 
@@ -57,14 +57,14 @@ docker-up:
 docker-down:
 	@echo "Stopping Docker services..."
 	cd deployments && docker-compose down
-	@echo "✅ Docker services stopped"
+	@echo "Docker services stopped"
 
 # Limpar binários e cache
 clean:
 	@echo "Cleaning..."
 	rm -rf bin/
 	go clean
-	@echo "✅ Clean completed"
+	@echo "Clean completed"
 
 # Ajuda
 help:

@@ -63,19 +63,3 @@ func ValidateToken(tokenString string) (*Claims, error) {
 
 	return nil, ErrInvalidToken
 }
-
-func RefreshToken(oldTokenString string) (string, error) {
-	token, err := jwt.ParseWithClaims(oldTokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return JWTSecret, nil
-	}, jwt.WithoutClaimsValidation())
-
-	if err != nil {
-		return "", ErrInvalidToken
-	}
-
-	if claims, ok := token.Claims.(*Claims); ok {
-		return GenerateToken(claims.UserID, claims.Username)
-	}
-
-	return "", ErrInvalidToken
-}

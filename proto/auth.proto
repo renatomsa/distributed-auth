@@ -6,10 +6,7 @@ option go_package = "github.com/renatomsa/auth-grpc/proto";
 
 service AuthService {
   rpc Login(LoginRequest) returns (LoginResponse);
-
   rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
-
-  rpc RefreshToken(RefreshTokenRequest) returns (LoginResponse);
 }
 
 message LoginRequest {
@@ -32,8 +29,4 @@ message ValidateTokenResponse {
   int32 user_id = 2;
   string username = 3;
   string message = 4;
-}
-
-message RefreshTokenRequest {
-  string token = 1;
 }
