@@ -20,8 +20,6 @@ import (
 
 var defaultBackends = []string{
 	"localhost:9001",
-	"localhost:9002",
-	"localhost:9003",
 }
 
 const loadBalancerPort = "9100"

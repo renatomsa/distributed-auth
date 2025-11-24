@@ -63,15 +63,15 @@ wait_for_port() {
 start_server 9001 1
 SERVER1_PID=$LAST_PID
 
-sleep 2
+#sleep 2
 
-start_server 9002 2
-SERVER2_PID=$LAST_PID
+#start_server 9002 2
+#SERVER2_PID=$LAST_PID
 
-sleep 2
+#sleep 2
 
-start_server 9003 3
-SERVER3_PID=$LAST_PID
+#start_server 9003 3
+#SERVER3_PID=$LAST_PID
 
 echo ""
 echo "All servers started!"
